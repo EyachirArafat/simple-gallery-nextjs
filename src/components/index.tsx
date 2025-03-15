@@ -1,19 +1,20 @@
 "use client";
 
 import ImageCard from "@/components/image-card";
+import { mediaData } from "@/data/db";
 import { ICard } from "@/types";
 import { useRouter, useSearchParams } from "next/navigation";
-import { FC, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Popup from "./popup";
 
-type IProps = {
-  data: ICard[];
-};
+// type IProps = {
+//   data: ICard[];
+// };
 // const PhotoGallery = ({ data }: { data: ICard[] }) => {
-const PhotoGallery: FC<IProps> = ({ data }) => {
+const PhotoGallery = () => {
   const [createNew, setCreateNew] = useState<ICard[]>([]);
 
-  const items = data;
+  const items = mediaData || [];
   const params = useSearchParams();
   const types = params.get("type");
   const search = params.get("search")?.trim();
@@ -33,9 +34,9 @@ const PhotoGallery: FC<IProps> = ({ data }) => {
     setCreateNew(filteredData);
   }, [types, search, items]);
 
-  const addNewOne = async (title: string, file: File, types: string) => {
+  const addNewOne = (title: string, file: File, types: string) => {
     const reader = new FileReader();
-    reader.onload = async (e) => {
+    reader.onload = (e) => {
       const IVid = items.length.toString();
 
       const addNew = {
@@ -48,17 +49,17 @@ const PhotoGallery: FC<IProps> = ({ data }) => {
         share: 0,
       };
 
-      const result = await fetch("http://localhost:10000/mediaData", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(addNew),
-      });
-      const res = await result.json();
-      setCreateNew((prev) => [...prev, res]);
+      // const result = await fetch("http://localhost:10000/mediaData", {
+      //   method: "POST",
+      //   headers: {
+      //     "Content-Type": "application/json",
+      //   },
+      //   body: JSON.stringify(addNew),
+      // });
+      // const res = await result.json();
+      // setCreateNew((prev) => [...prev, res]);
 
-      // setCreateNew((prev) => [...prev, addNew]);
+      setCreateNew((prev) => [...prev, addNew]);
       handleClose();
     };
 
