@@ -3,10 +3,14 @@
 import ImageCard from "@/components/image-card";
 import { ICard } from "@/types";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import Popup from "./popup";
 
-const PhotoGallery = ({ data }: { data: ICard[] }) => {
+type IProps = {
+  data: ICard[];
+};
+// const PhotoGallery = ({ data }: { data: ICard[] }) => {
+const PhotoGallery: FC<IProps> = ({ data }) => {
   const [createNew, setCreateNew] = useState<ICard[]>([]);
 
   const items = data;
