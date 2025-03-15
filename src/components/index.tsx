@@ -19,16 +19,6 @@ const PhotoGallery = () => {
   const route = useRouter();
   const handleClose = () => route.push("/");
 
-  // const filteredData = items.filter((item) =>
-  //   (types === "photos"
-  //     ? item.types === "photo"
-  //     : types === "videos"
-  //     ? item.types === "video"
-  //     : item) && search
-  //     ? item.title.toLowerCase().includes(search.toLowerCase())
-  //     : item
-  // );
-
   useEffect(() => {
     const filteredData = items.filter((item) => {
       if (types === "photos" && item.types !== "photo") return false;
@@ -60,7 +50,6 @@ const PhotoGallery = () => {
     };
 
     reader.readAsDataURL(file);
-    // console.log({ title, file, types });
   };
 
   const photo = createNew.filter((item) => item.types === "photo");

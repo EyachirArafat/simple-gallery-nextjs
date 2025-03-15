@@ -6,7 +6,6 @@ type Props = {
   submit: (title: string, file: File, types: string) => void;
   handleClose: () => void;
 };
-// const Popup = ({ submit }: { submit: Props["submit"] }) => {
 const Popup: FC<Props> = ({ submit, handleClose }) => {
   const [title, setTitle] = useState("");
   const [file, setFile] = useState<File | null>(null);
@@ -27,9 +26,6 @@ const Popup: FC<Props> = ({ submit, handleClose }) => {
     setFile(null);
     setTypes("photo");
   };
-
-  //   const route = useRouter();
-  //   const handleClose = () => route.push("/gallery");
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
