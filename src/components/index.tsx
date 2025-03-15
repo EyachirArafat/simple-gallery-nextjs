@@ -29,9 +29,9 @@ const PhotoGallery = ({ data }: { data: ICard[] }) => {
     setCreateNew(filteredData);
   }, [types, search, items]);
 
-  const addNewOne = (title: string, file: File, types: string) => {
+  const addNewOne = async (title: string, file: File, types: string) => {
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = async (e) => {
       const IVid = items.length.toString();
 
       const addNew = {
@@ -44,7 +44,17 @@ const PhotoGallery = ({ data }: { data: ICard[] }) => {
         share: 0,
       };
 
-      setCreateNew((prev) => [...prev, addNew]);
+      const result = await fetch("http://localhost:10000/mediaData", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(addNew),
+      });
+      const res = await result.json();
+      setCreateNew((prev) => [...prev, res]);
+
+      // setCreateNew((prev) => [...prev, addNew]);
       handleClose();
     };
 
