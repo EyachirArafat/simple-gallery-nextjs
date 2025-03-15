@@ -11,4 +11,10 @@ export interface ICard {
 
 export interface IChildren {
     children: React.ReactNode
-} 
+}
+
+export interface IUpload {
+    title: string;
+    file: File;
+    types: string;
+}
