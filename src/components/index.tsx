@@ -1,16 +1,15 @@
 "use client";
 
 import ImageCard from "@/components/image-card";
-import { MediaData } from "@/lib/data/data";
 import { ICard } from "@/types";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import Popup from "./popup";
 
-const PhotoGallery = () => {
+const PhotoGallery = ({ data }: { data: ICard[] }) => {
   const [createNew, setCreateNew] = useState<ICard[]>([]);
 
-  const items = MediaData || [];
+  const items = data;
   const params = useSearchParams();
   const types = params.get("type");
   const search = params.get("search")?.trim();
@@ -28,7 +27,7 @@ const PhotoGallery = () => {
       return true;
     });
     setCreateNew(filteredData);
-  }, [types, search]);
+  }, [types, search, items]);
 
   const addNewOne = (title: string, file: File, types: string) => {
     const reader = new FileReader();
