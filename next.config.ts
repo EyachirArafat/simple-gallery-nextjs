@@ -15,6 +15,14 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "img.freepik.com",
       },
+      {
+        protocol: "https",
+        hostname: "img.youtube.com",
+      },
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com",
+      }
     ],
   },
   /* config options here */
