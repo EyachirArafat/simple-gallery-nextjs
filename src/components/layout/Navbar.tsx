@@ -63,7 +63,7 @@ export const Navbar = () => {
           {/* Upload Button */}
           <button
             onClick={handleUpload}
-            className="hidden sm:flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white text-sm font-medium rounded-xl shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40 transition-all duration-200 hover:-translate-y-0.5"
+            className="hidden sm:flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white text-sm font-medium rounded-xl shadow-lg shadow-purple-500/25 cursor-pointer hover:shadow-purple-500/40 transition-all duration-200 hover:-translate-y-0.5"
           >
             <Upload className="w-4 h-4" />
             <span>Upload</span>
@@ -80,7 +80,7 @@ export const Navbar = () => {
           {/* Theme Toggle */}
           <button
             onClick={toggleTheme}
-            className="p-2.5 rounded-xl hover:bg-gray-800 text-gray-400 hover:text-white transition-colors"
+            className="p-2.5 rounded-xl hover:bg-gray-800 text-gray-400 cursor-pointer hover:text-white transition-colors"
             title={
               theme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"
             }
@@ -93,13 +93,13 @@ export const Navbar = () => {
           </button>
 
           {/* Notifications */}
-          <button className="relative p-2.5 rounded-xl hover:bg-gray-800 text-gray-400 hover:text-white transition-colors">
+          <button className="relative p-2.5 rounded-xl hover:bg-gray-800 text-gray-400 hover:text-white transition-colors cursor-pointer">
             <Bell className="w-5 h-5" />
             <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-purple-500 rounded-full" />
           </button>
 
           {/* User Avatar */}
-          <button className="ml-2 w-9 h-9 rounded-xl bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center text-white hover:from-purple-500 hover:to-blue-500 transition-all">
+          <button className="ml-2 w-9 h-9 rounded-xl bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center text-white cursor-pointer hover:from-purple-500 hover:to-blue-500 transition-all">
             <User className="w-4 h-4" />
           </button>
         </div>

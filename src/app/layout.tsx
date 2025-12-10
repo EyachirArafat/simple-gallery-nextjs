@@ -1,4 +1,5 @@
-import { Footer, Navbar, Sidebar } from "@/components/layout";
+import { Footer, Navbar, Sidebar, MainContent } from "@/components/layout";
+import { SidebarProvider } from "@/context/sidebar-context";
 import { Suspense } from "react";
 import "./globals.css";
 
@@ -29,24 +30,26 @@ export default function RootLayout({
         />
       </head>
       <body className="bg-gray-950 text-gray-100 antialiased">
-        <div className="flex min-h-screen">
-          {/* Sidebar */}
-          <Sidebar />
+        <SidebarProvider>
+          <div className="flex min-h-screen">
+            {/* Sidebar */}
+            <Sidebar />
 
-          {/* Main Content Area */}
-          <div className="flex-1 md:ml-64 flex flex-col min-h-screen transition-all duration-300">
-            {/* Navbar */}
-            <Suspense fallback={null}>
-              <Navbar />
-            </Suspense>
+            {/* Main Content Area */}
+            <MainContent>
+              {/* Navbar */}
+              <Suspense fallback={null}>
+                <Navbar />
+              </Suspense>
 
-            {/* Page Content */}
-            <main className="flex-1">{children}</main>
+              {/* Page Content */}
+              <main className="flex-1">{children}</main>
 
-            {/* Footer */}
-            <Footer />
+              {/* Footer */}
+              <Footer />
+            </MainContent>
           </div>
-        </div>
+        </SidebarProvider>
 
         {/* Background Effects */}
         <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">

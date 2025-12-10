@@ -1,5 +1,6 @@
 "use client";
 
+import { useSidebar } from "@/context/sidebar-context";
 import {
   ChevronLeft,
   ChevronRight,
@@ -18,7 +19,6 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
 
 const navItems = [
   { id: 1, label: "Home", href: "/", icon: Home },
@@ -37,8 +37,8 @@ const bottomItems = [
 ];
 
 export const Sidebar = () => {
-  const [isCollapsed, setIsCollapsed] = useState(false);
-  const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const { isCollapsed, setIsCollapsed, isMobileOpen, setIsMobileOpen } =
+    useSidebar();
   const pathname = usePathname();
 
   const toggleSidebar = () => setIsCollapsed(!isCollapsed);
@@ -53,7 +53,7 @@ export const Sidebar = () => {
         href={item.href}
         onClick={() => setIsMobileOpen(false)}
         className={`
-          group flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200
+          group flex items-center gap-3 px-2.5 py-2.5 rounded-xl transition-all duration-200
           ${
             isActive
               ? "bg-gradient-to-r from-purple-600/20 to-blue-600/20 text-purple-400 border border-purple-500/30"
@@ -153,7 +153,7 @@ export const Sidebar = () => {
           {/* Toggle Button (Desktop only) */}
           <button
             onClick={toggleSidebar}
-            className="hidden md:flex items-center justify-center w-8 h-8 mt-4 mx-auto rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-white transition-colors"
+            className="hidden md:flex items-center justify-center w-8 h-8 mt-4 ml-auto rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-white transition-colors cursor-pointer"
           >
             {isCollapsed ? (
               <ChevronRight className="w-4 h-4" />
