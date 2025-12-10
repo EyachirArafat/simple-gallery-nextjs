@@ -1,68 +1,101 @@
 "use client";
 
-import EmptyState from "@/components/ui/empty-state";
-import MediaCard from "@/components/ui/media-card";
-import { mediaData } from "@/data/db";
-import { ArrowLeft, Edit2, Folder, Image, Plus, Trash2 } from "lucide-react";
-import Link from "next/link";
+import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { useState } from "react";
+import Link from "next/link";
+import { ArrowLeft, Folder, Image, Edit2, Trash2, Plus } from "lucide-react";
+import MediaCard from "@/components/ui/media-card";
+import EmptyState from "@/components/ui/empty-state";
+import { LoadingGrid } from "@/components/ui/loading-spinner";
 
-// Sample collection data
-const collectionsData = {
-  "1": {
-    id: "1",
-    name: "Nature Photography",
-    description:
-      "Beautiful landscapes and nature shots from around the world. This collection features stunning sunsets, mountains, forests, and wildlife.",
-    coverImage:
-      "https://img.freepik.com/premium-photo/silhouette-person-mountains-man-taking-photo-with-camera-world-photography-day_1115207-4177.jpg",
-    createdAt: "2024-01-15",
-  },
-  "2": {
-    id: "2",
-    name: "Urban Exploration",
-    description: "City life and architecture from various metropolitan areas.",
-    coverImage:
-      "https://img.freepik.com/free-photo/nature-landscape-with-hand-holding-frame_23-2149389976.jpg",
-    createdAt: "2024-02-20",
-  },
-  "3": {
-    id: "3",
-    name: "Wildlife Moments",
-    description:
-      "Amazing animal photography collection from safaris and nature reserves.",
-    coverImage:
-      "https://img.freepik.com/free-photo/professional-photographer-takes-photos-with-camera-tripod-rocky-peak-sunset_335224-433.jpg",
-    createdAt: "2024-03-10",
-  },
-};
+interface Collection {
+  id: string;
+  name: string;
+  description: string | null;
+  coverImage: string | null;
+  createdAt: string;
+  media: Media[];
+}
+
+interface Media {
+  id: string;
+  title: string;
+  description: string | null;
+  src: string;
+  type: string;
+  category: string | null;
+  likes: number;
+  shares: number;
+  views: number;
+  isFavorite: boolean;
+}
 
 export default function CollectionDetailPage() {
   const params = useParams();
   const router = useRouter();
   const collectionId = params.id as string;
 
-  const collection =
-    collectionsData[collectionId as keyof typeof collectionsData];
+  const [collection, setCollection] = useState<Collection | null>(null);
+  const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
-  const [editName, setEditName] = useState(collection?.name || "");
-  const [editDescription, setEditDescription] = useState(
-    collection?.description || ""
-  );
+  const [editName, setEditName] = useState("");
+  const [editDescription, setEditDescription] = useState("");
 
-  // Get some media for this collection
-  const collectionMedia = mediaData.map((item) => ({
-    id: item.id,
-    src: item.src,
-    title: item.title,
-    description: item.des,
-    type: item.types as "photo" | "video",
-    likes: item.like,
-    shares: item.share,
-    views: Math.floor(Math.random() * 10000) + 1000,
-    isFavorite: false,
-  }));
+  useEffect(() => {
+    async function fetchCollection() {
+      try {
+        const res = await fetch(`/api/collections/${collectionId}`);
+        if (res.ok) {
+          const data = await res.json();
+          setCollection(data);
+          setEditName(data.name);
+          setEditDescription(data.description || "");
+        }
+      } catch (error) {
+        console.error("Error fetching collection:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchCollection();
+  }, [collectionId]);
+
+  const handleSaveEdit = async () => {
+    try {
+      await fetch(`/api/collections/${collectionId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: editName, description: editDescription }),
+      });
+      setCollection((prev) =>
+        prev ? { ...prev, name: editName, description: editDescription } : prev
+      );
+      setIsEditing(false);
+    } catch (error) {
+      console.error("Error updating collection:", error);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (confirm("Are you sure you want to delete this collection?")) {
+      try {
+        await fetch(`/api/collections/${collectionId}`, { method: "DELETE" });
+        router.push("/collections");
+      } catch (error) {
+        console.error("Error deleting collection:", error);
+      }
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen py-8 px-4">
+        <div className="container max-w-7xl mx-auto">
+          <LoadingGrid count={6} />
+        </div>
+      </div>
+    );
+  }
 
   if (!collection) {
     return (
@@ -79,17 +112,6 @@ export default function CollectionDetailPage() {
       </div>
     );
   }
-
-  const handleSaveEdit = () => {
-    // In real app, this would save to database
-    setIsEditing(false);
-  };
-
-  const handleDelete = () => {
-    if (confirm("Are you sure you want to delete this collection?")) {
-      router.push("/collections");
-    }
-  };
 
   return (
     <div className="min-h-screen py-8 px-4">
@@ -145,9 +167,7 @@ export default function CollectionDetailPage() {
                       rows={2}
                     />
                   ) : (
-                    <p className="text-gray-400 max-w-2xl">
-                      {collection.description}
-                    </p>
+                    <p className="text-gray-400 max-w-2xl">{collection.description}</p>
                   )}
                 </div>
               </div>
@@ -194,11 +214,9 @@ export default function CollectionDetailPage() {
         <div className="flex items-center gap-6 mb-8 text-sm text-gray-400">
           <div className="flex items-center gap-2">
             <Image className="w-4 h-4" />
-            <span>{collectionMedia.length} items</span>
+            <span>{collection.media?.length || 0} items</span>
           </div>
-          <span>
-            Created {new Date(collection.createdAt).toLocaleDateString()}
-          </span>
+          <span>Created {new Date(collection.createdAt).toLocaleDateString()}</span>
         </div>
 
         {/* Add Media Button */}
@@ -213,10 +231,21 @@ export default function CollectionDetailPage() {
         </div>
 
         {/* Collection Media Grid */}
-        {collectionMedia.length > 0 ? (
+        {collection.media && collection.media.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {collectionMedia.map((item) => (
-              <MediaCard key={item.id} {...item} />
+            {collection.media.map((item) => (
+              <MediaCard
+                key={item.id}
+                id={item.id}
+                src={item.src}
+                title={item.title}
+                description={item.description || undefined}
+                type={item.type as "photo" | "video"}
+                likes={item.likes}
+                shares={item.shares}
+                views={item.views}
+                isFavorite={item.isFavorite}
+              />
             ))}
           </div>
         ) : (
