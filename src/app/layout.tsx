@@ -1,12 +1,11 @@
+import { Footer, Navbar, Sidebar } from "@/components/layout";
 import { Suspense } from "react";
-import Sidebar from "@/components/layout/Sidebar";
-import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
 import "./globals.css";
 
 export const metadata = {
   title: "MediaHub - Your Ultimate Media Platform",
-  description: "Discover, upload, and share stunning photos and videos. Your ultimate destination for amazing media content.",
+  description:
+    "Discover, upload, and share stunning photos and videos. Your ultimate destination for amazing media content.",
   keywords: ["gallery", "photos", "videos", "media", "upload", "share"],
 };
 
@@ -19,7 +18,11 @@ export default function RootLayout({
     <html lang="en" className="dark">
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossOrigin="anonymous"
+        />
         <link
           href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
           rel="stylesheet"
@@ -38,9 +41,7 @@ export default function RootLayout({
             </Suspense>
 
             {/* Page Content */}
-            <main className="flex-1">
-              {children}
-            </main>
+            <main className="flex-1">{children}</main>
 
             {/* Footer */}
             <Footer />

@@ -1,13 +1,43 @@
+import MediaCard from "@/components/ui/media-card";
+import prisma from "@/lib/prisma";
+import {
+  ArrowRight,
+  Eye,
+  Folder,
+  Image,
+  Star,
+  TrendingUp,
+  Upload,
+  Users,
+  Video,
+} from "lucide-react";
 import Link from "next/link";
-import { ArrowRight, Image, Video, Folder, Upload, TrendingUp, Users, Eye, Star } from "lucide-react";
-import { mediaData } from "@/data/db";
-import MediaCard from "@/components/ui/MediaCard";
 
 const stats = [
-  { label: "Total Views", value: "12.5M+", icon: Eye, color: "from-purple-500 to-blue-500" },
-  { label: "Active Users", value: "50K+", icon: Users, color: "from-blue-500 to-cyan-500" },
-  { label: "Media Uploads", value: "100K+", icon: TrendingUp, color: "from-cyan-500 to-green-500" },
-  { label: "5-Star Reviews", value: "4.9", icon: Star, color: "from-yellow-500 to-orange-500" },
+  {
+    label: "Total Views",
+    value: "12.5M+",
+    icon: Eye,
+    color: "from-purple-500 to-blue-500",
+  },
+  {
+    label: "Active Users",
+    value: "50K+",
+    icon: Users,
+    color: "from-blue-500 to-cyan-500",
+  },
+  {
+    label: "Media Uploads",
+    value: "100K+",
+    icon: TrendingUp,
+    color: "from-cyan-500 to-green-500",
+  },
+  {
+    label: "5-Star Reviews",
+    value: "4.9",
+    icon: Star,
+    color: "from-yellow-500 to-orange-500",
+  },
 ];
 
 const features = [
@@ -49,18 +79,12 @@ const features = [
   },
 ];
 
-export default function HomePage() {
-  const recentMedia = mediaData.slice(0, 6).map((item, index) => ({
-    id: item.id,
-    src: item.src,
-    title: item.title,
-    description: item.des,
-    type: item.types as "photo" | "video",
-    likes: item.like,
-    shares: item.share,
-    views: Math.floor(Math.random() * 10000) + 1000,
-    isFavorite: false,
-  }));
+export default async function HomePage() {
+  // Fetch recent media from database
+  const recentMedia = await prisma.media.findMany({
+    take: 6,
+    orderBy: { createdAt: "desc" },
+  });
 
   return (
     <div className="min-h-screen">
@@ -69,7 +93,10 @@ export default function HomePage() {
         {/* Hero Background Effects */}
         <div className="absolute inset-0 -z-10">
           <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-purple-600/30 rounded-full blur-[150px] animate-pulse" />
-          <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-blue-600/30 rounded-full blur-[150px] animate-pulse" style={{ animationDelay: "1s" }} />
+          <div
+            className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-blue-600/30 rounded-full blur-[150px] animate-pulse"
+            style={{ animationDelay: "1s" }}
+          />
         </div>
 
         <div className="container max-w-6xl mx-auto text-center">
@@ -88,12 +115,19 @@ export default function HomePage() {
           </h1>
 
           {/* Subheading */}
-          <p className="text-lg md:text-xl text-gray-400 max-w-2xl mx-auto mb-10 animate-fadeInUp" style={{ animationDelay: "0.1s" }}>
-            Discover, upload, and share stunning photos and videos. Join thousands of creators showcasing their amazing work.
+          <p
+            className="text-lg md:text-xl text-gray-400 max-w-2xl mx-auto mb-10 animate-fadeInUp"
+            style={{ animationDelay: "0.1s" }}
+          >
+            Discover, upload, and share stunning photos and videos. Join
+            thousands of creators showcasing their amazing work.
           </p>
 
           {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fadeInUp" style={{ animationDelay: "0.2s" }}>
+          <div
+            className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fadeInUp"
+            style={{ animationDelay: "0.2s" }}
+          >
             <Link
               href="/gallery"
               className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white font-semibold rounded-xl shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 transition-all duration-300 hover:-translate-y-1"
@@ -125,13 +159,17 @@ export default function HomePage() {
                   style={{ animationDelay: `${index * 0.1}s` }}
                 >
                   {/* Gradient background on hover */}
-                  <div className={`absolute inset-0 bg-gradient-to-br ${stat.color} opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
+                  <div
+                    className={`absolute inset-0 bg-gradient-to-br ${stat.color} opacity-0 group-hover:opacity-100 transition-opacity duration-300`}
+                  />
 
                   <div className="relative">
                     <div className="w-12 h-12 rounded-xl bg-gray-700/50 flex items-center justify-center mb-4 group-hover:bg-white/10 transition-colors">
                       <Icon className="w-6 h-6 text-gray-400 group-hover:text-white transition-colors" />
                     </div>
-                    <p className="text-3xl md:text-4xl font-bold text-white mb-1">{stat.value}</p>
+                    <p className="text-3xl md:text-4xl font-bold text-white mb-1">
+                      {stat.value}
+                    </p>
                     <p className="text-sm text-gray-400">{stat.label}</p>
                   </div>
                 </div>
@@ -149,12 +187,13 @@ export default function HomePage() {
               Everything You Need
             </h2>
             <p className="text-gray-400 max-w-xl mx-auto">
-              Powerful features to help you manage, organize, and share your media content.
+              Powerful features to help you manage, organize, and share your
+              media content.
             </p>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {features.map((feature, index) => {
+            {features.map((feature) => {
               const Icon = feature.icon;
               return (
                 <Link
@@ -162,11 +201,17 @@ export default function HomePage() {
                   href={feature.href}
                   className={`group relative p-6 rounded-2xl bg-gradient-to-br ${feature.color} border ${feature.borderColor} hover:border-opacity-100 transition-all duration-300 hover:-translate-y-1`}
                 >
-                  <div className={`w-12 h-12 rounded-xl bg-gray-900/50 flex items-center justify-center mb-4 ${feature.iconColor}`}>
+                  <div
+                    className={`w-12 h-12 rounded-xl bg-gray-900/50 flex items-center justify-center mb-4 ${feature.iconColor}`}
+                  >
                     <Icon className="w-6 h-6" />
                   </div>
-                  <h3 className="font-semibold text-white text-lg mb-2">{feature.title}</h3>
-                  <p className="text-sm text-gray-400 mb-4">{feature.description}</p>
+                  <h3 className="font-semibold text-white text-lg mb-2">
+                    {feature.title}
+                  </h3>
+                  <p className="text-sm text-gray-400 mb-4">
+                    {feature.description}
+                  </p>
                   <span className="inline-flex items-center text-sm font-medium text-gray-300 group-hover:text-white transition-colors">
                     Learn more
                     <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
@@ -201,7 +246,19 @@ export default function HomePage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {recentMedia.map((item) => (
-              <MediaCard key={item.id} {...item} />
+              <MediaCard
+                key={item.id}
+                id={item.id}
+                src={item.src}
+                title={item.title}
+                description={item.description || undefined}
+                type={item.type as "photo" | "video"}
+                likes={item.likes}
+                shares={item.shares}
+                views={item.views}
+                isFavorite={item.isFavorite}
+                category={item.category || undefined}
+              />
             ))}
           </div>
 
@@ -229,7 +286,8 @@ export default function HomePage() {
                 Ready to Start Creating?
               </h2>
               <p className="text-gray-300 max-w-xl mx-auto mb-8">
-                Join our community of creators and start sharing your amazing photos and videos today.
+                Join our community of creators and start sharing your amazing
+                photos and videos today.
               </p>
               <Link
                 href="/upload"

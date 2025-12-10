@@ -1,136 +1,189 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { Play, Filter, SlidersHorizontal } from "lucide-react";
-import { mediaData } from "@/data/db";
-import MediaCard from "@/components/ui/MediaCard";
-import EmptyState from "@/components/ui/EmptyState";
+import EmptyState from "@/components/ui/empty-state";
+import { LoadingGrid } from "@/components/ui/loading-spinner";
+import MediaCard from "@/components/ui/media-card";
+import { Play, SlidersHorizontal } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 
-const categories = ["All", "Educational", "Entertainment", "Music", "Documentary", "Tutorial"];
+interface Media {
+  id: string;
+  title: string;
+  description: string | null;
+  src: string;
+  type: string;
+  category: string | null;
+  likes: number;
+  shares: number;
+  views: number;
+  isFavorite: boolean;
+}
+
+const categories = [
+  "All",
+  "Educational",
+  "Entertainment",
+  "Music",
+  "Documentary",
+  "Tutorial",
+  "Nature",
+  "Wildlife",
+];
 const sortOptions = [
-    { label: "Most Recent", value: "recent" },
-    { label: "Most Liked", value: "likes" },
-    { label: "Most Viewed", value: "views" },
+  { label: "Most Recent", value: "recent" },
+  { label: "Most Liked", value: "likes" },
+  { label: "Most Viewed", value: "views" },
 ];
 
 export default function VideosPage() {
-    const [selectedCategory, setSelectedCategory] = useState("All");
-    const [sortBy, setSortBy] = useState("recent");
+  const [videos, setVideos] = useState<Media[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [sortBy, setSortBy] = useState("recent");
 
-    // Transform and filter data
-    const videos = useMemo(() => {
-        let filtered = mediaData
-            .filter((item) => item.types === "video")
-            .map((item) => ({
-                id: item.id,
-                src: item.src,
-                title: item.title,
-                description: item.des,
-                type: "video" as const,
-                likes: item.like,
-                shares: item.share,
-                views: Math.floor(Math.random() * 50000) + 5000,
-                isFavorite: false,
-                category: categories[Math.floor(Math.random() * (categories.length - 1)) + 1],
-            }));
+  useEffect(() => {
+    async function fetchVideos() {
+      try {
+        const res = await fetch("/api/media?type=video");
+        const data = await res.json();
+        setVideos(data.data || []);
+      } catch (error) {
+        console.error("Error fetching videos:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchVideos();
+  }, []);
 
-        // Filter by category
-        if (selectedCategory !== "All") {
-            filtered = filtered.filter((item) => item.category === selectedCategory);
-        }
+  // Filter and sort videos
+  const filteredVideos = useMemo(() => {
+    let filtered = [...videos];
 
-        // Sort
-        switch (sortBy) {
-            case "likes":
-                filtered.sort((a, b) => b.likes - a.likes);
-                break;
-            case "views":
-                filtered.sort((a, b) => b.views - a.views);
-                break;
-            default:
-                break;
-        }
+    // Filter by category
+    if (selectedCategory !== "All") {
+      filtered = filtered.filter((item) => item.category === selectedCategory);
+    }
 
-        return filtered;
-    }, [selectedCategory, sortBy]);
+    // Sort
+    switch (sortBy) {
+      case "likes":
+        filtered.sort((a, b) => b.likes - a.likes);
+        break;
+      case "views":
+        filtered.sort((a, b) => b.views - a.views);
+        break;
+      default:
+        break;
+    }
 
+    return filtered;
+  }, [videos, selectedCategory, sortBy]);
+
+  if (loading) {
     return (
-        <div className="min-h-screen py-8 px-4">
-            <div className="container max-w-7xl mx-auto">
-                {/* Page Header */}
-                <div className="mb-8">
-                    <div className="flex items-center gap-3 mb-2">
-                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
-                            <Play className="w-5 h-5 text-white fill-white ml-0.5" />
-                        </div>
-                        <h1 className="text-3xl md:text-4xl font-bold text-white">
-                            Video Collection
-                        </h1>
-                    </div>
-                    <p className="text-gray-400">
-                        Watch amazing videos from creators around the world
-                    </p>
-                </div>
-
-                {/* Filters Bar */}
-                <div className="flex flex-col md:flex-row gap-4 mb-8 p-4 rounded-2xl bg-gray-800/30 border border-gray-700/50">
-                    {/* Categories */}
-                    <div className="flex-1">
-                        <div className="flex flex-wrap gap-2">
-                            {categories.map((category) => (
-                                <button
-                                    key={category}
-                                    onClick={() => setSelectedCategory(category)}
-                                    className={`px-4 py-2 text-sm font-medium rounded-xl transition-all duration-200 ${selectedCategory === category
-                                            ? "bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-500/25"
-                                            : "bg-gray-700/50 text-gray-300 hover:bg-gray-700 hover:text-white"
-                                        }`}
-                                >
-                                    {category}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* Sort Dropdown */}
-                    <div className="relative">
-                        <select
-                            value={sortBy}
-                            onChange={(e) => setSortBy(e.target.value)}
-                            className="appearance-none px-4 py-2 pr-10 bg-gray-700/50 border border-gray-600 rounded-xl text-sm text-gray-200 focus:outline-none focus:border-blue-500 cursor-pointer"
-                        >
-                            {sortOptions.map((option) => (
-                                <option key={option.value} value={option.value}>
-                                    {option.label}
-                                </option>
-                            ))}
-                        </select>
-                        <SlidersHorizontal className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                    </div>
-                </div>
-
-                {/* Results Count */}
-                <div className="mb-6">
-                    <p className="text-sm text-gray-400">
-                        Showing <span className="text-white font-medium">{videos.length}</span> videos
-                    </p>
-                </div>
-
-                {/* Videos Grid */}
-                {videos.length > 0 ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {videos.map((video) => (
-                            <MediaCard key={video.id} {...video} />
-                        ))}
-                    </div>
-                ) : (
-                    <EmptyState
-                        type="videos"
-                        title="No videos found"
-                        description="No videos match your current filters. Try a different category."
-                    />
-                )}
-            </div>
+      <div className="min-h-screen py-8 px-4">
+        <div className="container max-w-7xl mx-auto">
+          <LoadingGrid count={6} />
         </div>
+      </div>
     );
+  }
+
+  return (
+    <div className="min-h-screen py-8 px-4">
+      <div className="container max-w-7xl mx-auto">
+        {/* Page Header */}
+        <div className="mb-8">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
+              <Play className="w-5 h-5 text-white fill-white ml-0.5" />
+            </div>
+            <h1 className="text-3xl md:text-4xl font-bold text-white">
+              Video Collection
+            </h1>
+          </div>
+          <p className="text-gray-400">
+            Watch amazing videos from creators around the world
+          </p>
+        </div>
+
+        {/* Filters Bar */}
+        <div className="flex flex-col md:flex-row gap-4 mb-8 p-4 rounded-2xl bg-gray-800/30 border border-gray-700/50">
+          {/* Categories */}
+          <div className="flex-1">
+            <div className="flex flex-wrap gap-2">
+              {categories.map((category) => (
+                <button
+                  key={category}
+                  onClick={() => setSelectedCategory(category)}
+                  className={`px-4 py-2 text-sm font-medium rounded-xl transition-all duration-200 ${
+                    selectedCategory === category
+                      ? "bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-500/25"
+                      : "bg-gray-700/50 text-gray-300 hover:bg-gray-700 hover:text-white"
+                  }`}
+                >
+                  {category}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Sort Dropdown */}
+          <div className="relative">
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="appearance-none px-4 py-2 pr-10 bg-gray-700/50 border border-gray-600 rounded-xl text-sm text-gray-200 focus:outline-none focus:border-blue-500 cursor-pointer"
+            >
+              {sortOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+            <SlidersHorizontal className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+          </div>
+        </div>
+
+        {/* Results Count */}
+        <div className="mb-6">
+          <p className="text-sm text-gray-400">
+            Showing{" "}
+            <span className="text-white font-medium">
+              {filteredVideos.length}
+            </span>{" "}
+            videos
+          </p>
+        </div>
+
+        {/* Videos Grid */}
+        {filteredVideos.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredVideos.map((video) => (
+              <MediaCard
+                key={video.id}
+                id={video.id}
+                src={video.src}
+                title={video.title}
+                description={video.description || undefined}
+                type="video"
+                likes={video.likes}
+                shares={video.shares}
+                views={video.views}
+                isFavorite={video.isFavorite}
+                category={video.category || undefined}
+              />
+            ))}
+          </div>
+        ) : (
+          <EmptyState
+            type="videos"
+            title="No videos found"
+            description="No videos match your current filters. Try a different category."
+          />
+        )}
+      </div>
+    </div>
+  );
 }
