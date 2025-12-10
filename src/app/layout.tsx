@@ -1,4 +1,4 @@
-import { Footer, Navbar, Sidebar, MainContent } from "@/components/layout";
+import { Footer, MainContent, Navbar, Sidebar } from "@/components/layout";
 import { SidebarProvider } from "@/context/sidebar-context";
 import { Suspense } from "react";
 import "./globals.css";

@@ -1,72 +1,32 @@
 "use client";
 
 import EmptyState from "@/components/ui/empty-state";
-import { LoadingGrid } from "@/components/ui/loading-spinner";
+import { collectionsData } from "@/data/static-data";
 import { Folder, Image, Plus } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
-
-interface Collection {
-  id: string;
-  name: string;
-  description: string | null;
-  coverImage: string | null;
-  mediaCount: number;
-}
+import { useState } from "react";
 
 export default function CollectionsPage() {
-  const [collections, setCollections] = useState<Collection[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [collections, setCollections] = useState(collectionsData);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newCollectionName, setNewCollectionName] = useState("");
-  const [creating, setCreating] = useState(false);
 
-  useEffect(() => {
-    fetchCollections();
-  }, []);
-
-  async function fetchCollections() {
-    try {
-      const res = await fetch("/api/collections");
-      const data = await res.json();
-      setCollections(data || []);
-    } catch (error) {
-      console.error("Error fetching collections:", error);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  const handleCreateCollection = async () => {
+  const handleCreateCollection = () => {
     if (!newCollectionName.trim()) return;
 
-    setCreating(true);
-    try {
-      const res = await fetch("/api/collections", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: newCollectionName }),
-      });
-      const newCollection = await res.json();
-      setCollections([{ ...newCollection, mediaCount: 0 }, ...collections]);
-      setNewCollectionName("");
-      setShowCreateModal(false);
-    } catch (error) {
-      console.error("Error creating collection:", error);
-    } finally {
-      setCreating(false);
-    }
-  };
+    const newCollection = {
+      id: String(Date.now()),
+      name: newCollectionName,
+      description: "",
+      coverImage: "",
+      mediaCount: 0,
+      createdAt: new Date().toISOString().split("T")[0],
+    };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen py-8 px-4">
-        <div className="container max-w-7xl mx-auto">
-          <LoadingGrid count={6} />
-        </div>
-      </div>
-    );
-  }
+    setCollections([newCollection, ...collections]);
+    setNewCollectionName("");
+    setShowCreateModal(false);
+  };
 
   return (
     <div className="min-h-screen py-8 px-4">
@@ -104,7 +64,6 @@ export default function CollectionsPage() {
                 href={`/collections/${collection.id}`}
                 className="group relative overflow-hidden rounded-2xl bg-gray-800/50 border border-gray-700/50 hover:border-green-500/30 transition-all duration-300"
               >
-                {/* Cover Image */}
                 <div className="relative aspect-[16/10] overflow-hidden bg-gray-900">
                   {collection.coverImage ? (
                     <img
@@ -118,15 +77,11 @@ export default function CollectionsPage() {
                     </div>
                   )}
                   <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/40 to-transparent" />
-
-                  {/* Media Count Badge */}
                   <div className="absolute top-3 right-3 px-2.5 py-1 rounded-lg bg-gray-900/70 backdrop-blur-sm text-xs font-medium text-gray-200 flex items-center gap-1.5">
                     <Image className="w-3.5 h-3.5" />
                     {collection.mediaCount}
                   </div>
                 </div>
-
-                {/* Content */}
                 <div className="p-4">
                   <h3 className="font-semibold text-white text-lg mb-1 group-hover:text-green-400 transition-colors">
                     {collection.name}
@@ -177,10 +132,10 @@ export default function CollectionsPage() {
                 </button>
                 <button
                   onClick={handleCreateCollection}
-                  disabled={!newCollectionName.trim() || creating}
+                  disabled={!newCollectionName.trim()}
                   className="px-5 py-2.5 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-medium rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                 >
-                  {creating ? "Creating..." : "Create"}
+                  Create
                 </button>
               </div>
             </div>

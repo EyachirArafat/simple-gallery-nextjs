@@ -1,33 +1,18 @@
 "use client";
 
 import EmptyState from "@/components/ui/empty-state";
-import { LoadingGrid } from "@/components/ui/loading-spinner";
 import MediaCard from "@/components/ui/media-card";
+import { mediaData } from "@/data/static-data";
 import { Play, SlidersHorizontal } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
-
-interface Media {
-  id: string;
-  title: string;
-  description: string | null;
-  src: string;
-  type: string;
-  category: string | null;
-  likes: number;
-  shares: number;
-  views: number;
-  isFavorite: boolean;
-}
+import { useMemo, useState } from "react";
 
 const categories = [
   "All",
-  "Educational",
-  "Entertainment",
-  "Music",
-  "Documentary",
-  "Tutorial",
   "Nature",
   "Wildlife",
+  "Urban",
+  "Portrait",
+  "Abstract",
 ];
 const sortOptions = [
   { label: "Most Recent", value: "recent" },
@@ -36,36 +21,16 @@ const sortOptions = [
 ];
 
 export default function VideosPage() {
-  const [videos, setVideos] = useState<Media[]>([]);
-  const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [sortBy, setSortBy] = useState("recent");
 
-  useEffect(() => {
-    async function fetchVideos() {
-      try {
-        const res = await fetch("/api/media?type=video");
-        const data = await res.json();
-        setVideos(data.data || []);
-      } catch (error) {
-        console.error("Error fetching videos:", error);
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchVideos();
-  }, []);
+  const videos = useMemo(() => {
+    let filtered = mediaData.filter((item) => item.type === "video");
 
-  // Filter and sort videos
-  const filteredVideos = useMemo(() => {
-    let filtered = [...videos];
-
-    // Filter by category
     if (selectedCategory !== "All") {
       filtered = filtered.filter((item) => item.category === selectedCategory);
     }
 
-    // Sort
     switch (sortBy) {
       case "likes":
         filtered.sort((a, b) => b.likes - a.likes);
@@ -78,17 +43,7 @@ export default function VideosPage() {
     }
 
     return filtered;
-  }, [videos, selectedCategory, sortBy]);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen py-8 px-4">
-        <div className="container max-w-7xl mx-auto">
-          <LoadingGrid count={6} />
-        </div>
-      </div>
-    );
-  }
+  }, [selectedCategory, sortBy]);
 
   return (
     <div className="min-h-screen py-8 px-4">
@@ -110,7 +65,6 @@ export default function VideosPage() {
 
         {/* Filters Bar */}
         <div className="flex flex-col md:flex-row gap-4 mb-8 p-4 rounded-2xl bg-gray-800/30 border border-gray-700/50">
-          {/* Categories */}
           <div className="flex-1">
             <div className="flex flex-wrap gap-2">
               {categories.map((category) => (
@@ -129,7 +83,6 @@ export default function VideosPage() {
             </div>
           </div>
 
-          {/* Sort Dropdown */}
           <div className="relative">
             <select
               value={sortBy}
@@ -150,29 +103,27 @@ export default function VideosPage() {
         <div className="mb-6">
           <p className="text-sm text-gray-400">
             Showing{" "}
-            <span className="text-white font-medium">
-              {filteredVideos.length}
-            </span>{" "}
+            <span className="text-white font-medium">{videos.length}</span>{" "}
             videos
           </p>
         </div>
 
         {/* Videos Grid */}
-        {filteredVideos.length > 0 ? (
+        {videos.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredVideos.map((video) => (
+            {videos.map((video) => (
               <MediaCard
                 key={video.id}
                 id={video.id}
                 src={video.src}
                 title={video.title}
-                description={video.description || undefined}
+                description={video.description}
                 type="video"
                 likes={video.likes}
                 shares={video.shares}
                 views={video.views}
                 isFavorite={video.isFavorite}
-                category={video.category || undefined}
+                category={video.category}
               />
             ))}
           </div>

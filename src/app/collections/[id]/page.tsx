@@ -1,101 +1,27 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
-import Link from "next/link";
-import { ArrowLeft, Folder, Image, Edit2, Trash2, Plus } from "lucide-react";
-import MediaCard from "@/components/ui/media-card";
 import EmptyState from "@/components/ui/empty-state";
-import { LoadingGrid } from "@/components/ui/loading-spinner";
-
-interface Collection {
-  id: string;
-  name: string;
-  description: string | null;
-  coverImage: string | null;
-  createdAt: string;
-  media: Media[];
-}
-
-interface Media {
-  id: string;
-  title: string;
-  description: string | null;
-  src: string;
-  type: string;
-  category: string | null;
-  likes: number;
-  shares: number;
-  views: number;
-  isFavorite: boolean;
-}
+import MediaCard from "@/components/ui/media-card";
+import { collectionsData, mediaData } from "@/data/static-data";
+import { ArrowLeft, Edit2, Folder, Image, Plus, Trash2 } from "lucide-react";
+import Link from "next/link";
+import { useParams, useRouter } from "next/navigation";
+import { useState } from "react";
 
 export default function CollectionDetailPage() {
   const params = useParams();
   const router = useRouter();
   const collectionId = params.id as string;
 
-  const [collection, setCollection] = useState<Collection | null>(null);
-  const [loading, setLoading] = useState(true);
+  const collection = collectionsData.find((c) => c.id === collectionId);
   const [isEditing, setIsEditing] = useState(false);
-  const [editName, setEditName] = useState("");
-  const [editDescription, setEditDescription] = useState("");
+  const [editName, setEditName] = useState(collection?.name || "");
+  const [editDescription, setEditDescription] = useState(
+    collection?.description || ""
+  );
 
-  useEffect(() => {
-    async function fetchCollection() {
-      try {
-        const res = await fetch(`/api/collections/${collectionId}`);
-        if (res.ok) {
-          const data = await res.json();
-          setCollection(data);
-          setEditName(data.name);
-          setEditDescription(data.description || "");
-        }
-      } catch (error) {
-        console.error("Error fetching collection:", error);
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchCollection();
-  }, [collectionId]);
-
-  const handleSaveEdit = async () => {
-    try {
-      await fetch(`/api/collections/${collectionId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: editName, description: editDescription }),
-      });
-      setCollection((prev) =>
-        prev ? { ...prev, name: editName, description: editDescription } : prev
-      );
-      setIsEditing(false);
-    } catch (error) {
-      console.error("Error updating collection:", error);
-    }
-  };
-
-  const handleDelete = async () => {
-    if (confirm("Are you sure you want to delete this collection?")) {
-      try {
-        await fetch(`/api/collections/${collectionId}`, { method: "DELETE" });
-        router.push("/collections");
-      } catch (error) {
-        console.error("Error deleting collection:", error);
-      }
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen py-8 px-4">
-        <div className="container max-w-7xl mx-auto">
-          <LoadingGrid count={6} />
-        </div>
-      </div>
-    );
-  }
+  // Get some sample media for this collection
+  const collectionMedia = mediaData.slice(0, 6);
 
   if (!collection) {
     return (
@@ -113,6 +39,16 @@ export default function CollectionDetailPage() {
     );
   }
 
+  const handleSaveEdit = () => {
+    setIsEditing(false);
+  };
+
+  const handleDelete = () => {
+    if (confirm("Are you sure you want to delete this collection?")) {
+      router.push("/collections");
+    }
+  };
+
   return (
     <div className="min-h-screen py-8 px-4">
       <div className="container max-w-7xl mx-auto">
@@ -127,7 +63,6 @@ export default function CollectionDetailPage() {
 
         {/* Collection Header */}
         <div className="relative rounded-3xl overflow-hidden mb-8">
-          {/* Cover Image */}
           <div className="h-48 md:h-64 bg-gray-800">
             {collection.coverImage && (
               <img
@@ -139,7 +74,6 @@ export default function CollectionDetailPage() {
             <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/50 to-transparent" />
           </div>
 
-          {/* Content */}
           <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8">
             <div className="flex items-start justify-between gap-4">
               <div className="flex items-start gap-4">
@@ -167,12 +101,13 @@ export default function CollectionDetailPage() {
                       rows={2}
                     />
                   ) : (
-                    <p className="text-gray-400 max-w-2xl">{collection.description}</p>
+                    <p className="text-gray-400 max-w-2xl">
+                      {collection.description}
+                    </p>
                   )}
                 </div>
               </div>
 
-              {/* Actions */}
               <div className="flex items-center gap-2">
                 {isEditing ? (
                   <>
@@ -214,9 +149,11 @@ export default function CollectionDetailPage() {
         <div className="flex items-center gap-6 mb-8 text-sm text-gray-400">
           <div className="flex items-center gap-2">
             <Image className="w-4 h-4" />
-            <span>{collection.media?.length || 0} items</span>
+            <span>{collection.mediaCount} items</span>
           </div>
-          <span>Created {new Date(collection.createdAt).toLocaleDateString()}</span>
+          <span>
+            Created {new Date(collection.createdAt).toLocaleDateString()}
+          </span>
         </div>
 
         {/* Add Media Button */}
@@ -231,15 +168,15 @@ export default function CollectionDetailPage() {
         </div>
 
         {/* Collection Media Grid */}
-        {collection.media && collection.media.length > 0 ? (
+        {collectionMedia.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {collection.media.map((item) => (
+            {collectionMedia.map((item) => (
               <MediaCard
                 key={item.id}
                 id={item.id}
                 src={item.src}
                 title={item.title}
-                description={item.description || undefined}
+                description={item.description}
                 type={item.type as "photo" | "video"}
                 likes={item.likes}
                 shares={item.shares}

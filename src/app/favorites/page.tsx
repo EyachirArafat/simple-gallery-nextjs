@@ -1,76 +1,29 @@
 "use client";
 
 import EmptyState from "@/components/ui/empty-state";
-import { LoadingGrid } from "@/components/ui/loading-spinner";
 import MediaCard from "@/components/ui/media-card";
+import { mediaData } from "@/data/static-data";
 import { Heart, Trash2 } from "lucide-react";
-import { useEffect, useState } from "react";
-
-interface Media {
-  id: string;
-  title: string;
-  description: string | null;
-  src: string;
-  type: string;
-  category: string | null;
-  likes: number;
-  shares: number;
-  views: number;
-  isFavorite: boolean;
-}
+import { useMemo, useState } from "react";
 
 export default function FavoritesPage() {
-  const [favorites, setFavorites] = useState<Media[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [removedIds, setRemovedIds] = useState<string[]>([]);
 
-  useEffect(() => {
-    async function fetchFavorites() {
-      try {
-        const res = await fetch("/api/media?favorites=true");
-        const data = await res.json();
-        setFavorites(data.data || []);
-      } catch (error) {
-        console.error("Error fetching favorites:", error);
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchFavorites();
-  }, []);
-
-  const handleRemoveFavorite = async (id: string) => {
-    try {
-      await fetch(`/api/media/${id}/favorite`, { method: "POST" });
-      setFavorites((prev) => prev.filter((item) => item.id !== id));
-    } catch (error) {
-      console.error("Error removing favorite:", error);
-    }
-  };
-
-  const handleClearAll = async () => {
-    if (confirm("Are you sure you want to remove all favorites?")) {
-      try {
-        await Promise.all(
-          favorites.map((item) =>
-            fetch(`/api/media/${item.id}/favorite`, { method: "POST" })
-          )
-        );
-        setFavorites([]);
-      } catch (error) {
-        console.error("Error clearing favorites:", error);
-      }
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen py-8 px-4">
-        <div className="container max-w-7xl mx-auto">
-          <LoadingGrid count={6} />
-        </div>
-      </div>
+  const favorites = useMemo(() => {
+    return mediaData.filter(
+      (item) => item.isFavorite && !removedIds.includes(item.id)
     );
-  }
+  }, [removedIds]);
+
+  const handleRemoveFavorite = (id: string) => {
+    setRemovedIds((prev) => [...prev, id]);
+  };
+
+  const handleClearAll = () => {
+    if (confirm("Are you sure you want to remove all favorites?")) {
+      setRemovedIds(favorites.map((item) => item.id));
+    }
+  };
 
   return (
     <div className="min-h-screen py-8 px-4">
@@ -120,13 +73,13 @@ export default function FavoritesPage() {
                 id={item.id}
                 src={item.src}
                 title={item.title}
-                description={item.description || undefined}
+                description={item.description}
                 type={item.type as "photo" | "video"}
                 likes={item.likes}
                 shares={item.shares}
                 views={item.views}
                 isFavorite={true}
-                category={item.category || undefined}
+                category={item.category}
                 onFavorite={handleRemoveFavorite}
               />
             ))}

@@ -1,6 +1,4 @@
-"use client";
-
-import { LoadingGrid } from "@/components/ui/loading-spinner";
+import { categoriesData } from "@/data/static-data";
 import {
   Building,
   Camera,
@@ -13,16 +11,6 @@ import {
   Video,
 } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
-
-interface Category {
-  id: string;
-  name: string;
-  slug: string;
-  icon: string | null;
-  color: string | null;
-  mediaCount: number;
-}
 
 const iconMap: Record<string, React.ElementType> = {
   Nature: Mountain,
@@ -30,7 +18,6 @@ const iconMap: Record<string, React.ElementType> = {
   Urban: Building,
   Portrait: User,
   Abstract: Sparkles,
-  Photography: Camera,
 };
 
 const colorMap: Record<
@@ -71,34 +58,6 @@ const defaultColors = {
 };
 
 export default function CategoriesPage() {
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    async function fetchCategories() {
-      try {
-        const res = await fetch("/api/categories");
-        const data = await res.json();
-        setCategories(data || []);
-      } catch (error) {
-        console.error("Error fetching categories:", error);
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchCategories();
-  }, []);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen py-8 px-4">
-        <div className="container max-w-7xl mx-auto">
-          <LoadingGrid count={6} />
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen py-8 px-4">
       <div className="container max-w-7xl mx-auto">
@@ -119,7 +78,7 @@ export default function CategoriesPage() {
 
         {/* Categories Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {categories.map((category) => {
+          {categoriesData.map((category) => {
             const Icon = iconMap[category.name] || Camera;
             const colors = colorMap[category.name] || defaultColors;
 
@@ -129,20 +88,17 @@ export default function CategoriesPage() {
                 href={`/gallery?category=${category.slug}`}
                 className={`group relative p-6 rounded-2xl bg-gradient-to-br ${colors.bgColor} border ${colors.borderColor} hover:border-opacity-100 transition-all duration-300 hover:-translate-y-1 overflow-hidden`}
               >
-                {/* Background Glow */}
                 <div
                   className={`absolute top-0 right-0 w-32 h-32 rounded-full bg-gradient-to-br ${colors.color} opacity-20 blur-2xl group-hover:opacity-30 transition-opacity`}
                 />
 
                 <div className="relative">
-                  {/* Icon */}
                   <div
                     className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${colors.color} flex items-center justify-center mb-4 shadow-lg`}
                   >
                     <Icon className="w-7 h-7 text-white" />
                   </div>
 
-                  {/* Content */}
                   <h3 className="text-xl font-semibold text-white mb-1">
                     {category.name}
                   </h3>
@@ -150,7 +106,6 @@ export default function CategoriesPage() {
                     {category.mediaCount} items
                   </p>
 
-                  {/* Stats */}
                   <div className="flex items-center gap-4 mt-4 text-sm text-gray-400">
                     <span className="flex items-center gap-1">
                       <Image className="w-4 h-4" />
