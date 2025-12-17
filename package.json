@@ -19,7 +19,7 @@
     "framer-motion": "^12.23.25",
     "json-server": "^1.0.0-beta.3",
     "lucide-react": "^0.556.0",
-    "next": "^16.0.8",
+    "next": "^16.0.10",
     "react": "^19.2.1",
     "react-dom": "^19.2.1",
     "tw-merge": "^0.0.1-alpha.3"
